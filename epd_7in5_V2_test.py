@@ -16,10 +16,23 @@ import google.cloud
 from firebase_admin import credentials, firestore
 import time
 import traceback
+import textwrap
+
+
+def draw_multiple_line_text(image, text, font, text_color, text_start_height):
+ 
+    draw = ImageDraw.Draw(image)
+    image_width, image_height = image.size
+    y_text = text_start_height
+    lines = textwrap.wrap(text, width=15)
+    for line in lines:
+        line_width, line_height = font.getsize(line)
+        draw.text(((image_width - line_width) / 2, y_text), 
+                  line, font=font, fill=text_color)
+        y_text += line_height
 
 logging.basicConfig(level=logging.DEBUG)
-font24 = ImageFont.truetype(os.path.join(picdir, 'Font.ttc'), 190)
-font18 = ImageFont.truetype(os.path.join(picdir, 'Font.ttc'), 75)
+
 global displayedMessage
 displayedMessage = ""
 
@@ -50,27 +63,37 @@ try:
             if lastMessage == "":
                 lastMessage = doc_dict['message']
                 lastMessageTime = doc_dict['time']
+                SentBy = doc_dict['sendBy']
             elif (doc_dict['time'] > lastMessageTime) & (doc_dict['message'] != lastMessage):
                 lastMessage = doc_dict['message']
                 lastMessageTime = doc_dict['time']
+                SentBy = doc_dict['sendBy']
 
         displayedMessage = lastMessage
+        sender = SentBy
+        print(sender)
         logging.info("epd7in5_V2 Demo")
         epd = epd7in5_V2.EPD()
         
         logging.info("init and Clear")
         epd.init()
         epd.Clear()
+        
+        
 
-        font24 = ImageFont.truetype(os.path.join(picdir, 'Font.ttc'), 190)
-        font18 = ImageFont.truetype(os.path.join(picdir, 'Font.ttc'), 75)
-
-        # Drawing on the Horizontal image
+        # Drawing on the Horizontal image 
         logging.info("1.Drawing on the Horizontal image...")
-        Himage = Image.new('1', (epd.width, epd.height), 255)  # 255: clear the frame
-        draw = ImageDraw.Draw(Himage)
-        draw.text((10, 175), displayedMessage, font = font24, fill = 0)
-        epd.display(epd.getbuffer(Himage))
+        
+        image = Image.new('1', (epd.width, epd.height), color = 255)
+        draw = ImageDraw.Draw(image)
+        fontsize = 125 #starting font size
+        text_color = 0
+        text_start_height = 10
+        fnt = ImageFont.truetype(os.path.join(picdir, 'Font.ttc'), fontsize)
+        fnt36 = ImageFont.truetype(os.path.join(picdir, 'Font.ttc'), 36)
+        draw_multiple_line_text(image, displayedMessage, fnt, text_color, text_start_height)
+        draw.text((epd.width-300, epd.height-45), 'By, ' + sender, font = fnt36, fill = 0)
+        epd.display(epd.getbuffer(image))
         time.sleep(2)
 
 
