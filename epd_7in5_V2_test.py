@@ -70,6 +70,8 @@ try:
                 SentBy = doc_dict['sendBy']
 
         displayedMessage = lastMessage
+        stringLength = len(displayedMessage)
+        print(stringLength)
         sender = SentBy
         print(sender)
         logging.info("epd7in5_V2 Demo")
@@ -86,13 +88,31 @@ try:
         
         image = Image.new('1', (epd.width, epd.height), color = 255)
         draw = ImageDraw.Draw(image)
-        fontsize = 125 #starting font size
+        if 0<stringLength<6:
+            fontsize = 275
+        elif 5<stringLength<8:
+            fontsize = 220
+        elif 7<stringLength<10:
+            fontsize = 170
+        elif 9<stringLength<12:
+            fontsize = 150
+        elif stringLength == 12:
+            fontsize = 125
+        elif stringLength == 13:
+            fontsize = 120
+        elif stringLength == 14:
+            fontsize = 120
+        else:
+            fontsize = 120
+        
+        print(fontsize)
+        #fontsize = 125 #starting font size
         text_color = 0
         text_start_height = 10
         fnt = ImageFont.truetype(os.path.join(picdir, 'Font.ttc'), fontsize)
         fnt36 = ImageFont.truetype(os.path.join(picdir, 'Font.ttc'), 36)
         draw_multiple_line_text(image, displayedMessage, fnt, text_color, text_start_height)
-        draw.text((epd.width-300, epd.height-45), 'By, ' + sender, font = fnt36, fill = 0)
+        draw.text((epd.width-300, epd.height-45), 'From, ' + sender, font = fnt36, fill = 0)
         epd.display(epd.getbuffer(image))
         time.sleep(2)
 
